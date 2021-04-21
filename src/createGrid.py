@@ -24,7 +24,7 @@ MARGIN = 2
 #This sets the default size of each cell on the grid
 GRID_SIZE = 40
 
-json_data = pars_json("json.json")
+json_data = pars_json("../data/json.json")
 
 #Set the dimensions of the grid
 y_dimension = json_data["ydimension"]

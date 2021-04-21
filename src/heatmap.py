@@ -14,7 +14,7 @@ def pars_json(file):
 
   return data
 
-json_data = pars_json("/Users/petros/Desktop/robotEmulator/data/json.json")
+json_data = pars_json("../data/json.json")
 
 #Set the dimensions of the grid
 y_dimension = json_data["ydimension"]
