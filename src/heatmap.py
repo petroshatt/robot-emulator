@@ -1,3 +1,7 @@
+import matplotlib.pyplot as plt
+import seaborn as sb
+import numpy as np
+import random
 import json
 
 def pars_json(file):
@@ -16,24 +20,24 @@ json_data = pars_json("/Users/petros/Desktop/robotEmulator/data/json.json")
 y_dimension = json_data["ydimension"]
 x_dimension = json_data["xdimension"]
 
-# Create a 2 dimensional array. A two dimensional
-# array is simply a list of lists.
-grid = []
-for row in range(y_dimension):
-    # Add an empty array that will hold each cell
-    # in this row
-    grid.append([])
-    for column in range(x_dimension):
-        grid[row].append(0)  # Append a cell
+grid = np.zeros((x_dimension,y_dimension))
 
-'''
+
 num_of_rob = len(json_data["robots_movements"])
 
 for k in range(num_of_rob):
 
-	num_of_moves = len(json_data["robots_movements"][k-1]["move"])
+  num_of_moves = len(json_data["robots_movements"][k]["move"])
 
-	for j in range(num_of_moves):
-'''
+  for j in range(num_of_moves):
+
+    y = json_data["robots_movements"][k]["move"][j][0]
+    x = json_data["robots_movements"][k]["move"][j][1]
+    grid[y-1][x-1] += 1
 
 
+fig, ax = plt.subplots(figsize=(11, 9))
+# plot heatmap
+sb.heatmap(grid, cmap="Blues", vmin= 0, vmax=np.amax(grid),
+           linewidth=0.3, cbar_kws={"shrink": .8})
+plt.show()
