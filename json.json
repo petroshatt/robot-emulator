@@ -1,5 +1,5 @@
 {
-  "xdimension_hat": 20,
+  "xdimension": 20,
   "ydimension": 20,
   "tile_size":  10,
   "obstacle": [
