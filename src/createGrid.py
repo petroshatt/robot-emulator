@@ -73,16 +73,16 @@ num_of_groups = len(json_data["obstacle"])
 
 for i in range(num_of_groups):
 
-  num_of_obs = len(json_data["obstacle"][i]["tile_size"])
-  color = json_data["obstacle"][i]["tile_color"]
+  num_of_obs = len(json_data["obstacle"][i]["group_pos"])
+  color = json_data["obstacle"][i]["group_color"]
   color = color.split("(")
   color = color[1].split(")")
   #print(color[0])
   color1, color2, color3 = color[0].split(",")
 
   for j in range(num_of_obs):
-    temp_row_obs = json_data["obstacle"][i]["tile_size"][j][0]
-    temp_col_obs = json_data["obstacle"][i]["tile_size"][j][1]
+    temp_row_obs = json_data["obstacle"][i]["group_pos"][j][0]
+    temp_col_obs = json_data["obstacle"][i]["group_pos"][j][1]
     #print(type(temp_col_obs))
     grid[temp_row_obs-1][temp_col_obs-1] = (int(color1),int(color2),int(color3))
 

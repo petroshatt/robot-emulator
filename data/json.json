@@ -2,10 +2,11 @@
   "xdimension": 20,
   "ydimension": 20,
   "tile_size":  10,
+
   "obstacle": [
     {
-      "tile_color": "(255,0,0)",
-      "tile_size": [
+      "group_color": "(255,0,0)",
+      "group_pos": [
         [
           2,
           2
@@ -17,8 +18,8 @@
       ]
     },
     {
-      "tile_color": "(0,255,0)",
-      "tile_size": [
+      "group_color": "(0,255,0)",
+      "group_pos": [
         [
           3,
           5
@@ -86,12 +87,12 @@
           6
         ],
         [
-          20,
-          20
+          3,
+          7
         ],
         [
-          20,
-          20
+          4,
+          7
         ]
       ]
     }
