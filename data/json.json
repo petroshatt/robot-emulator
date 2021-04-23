@@ -1,6 +1,6 @@
 {
-  "xdimension": 20,
-  "ydimension": 20,
+  "xdimension": 300,
+  "ydimension": 100,
   "tile_size":  10,
 
   "obstacle": [

@@ -1,6 +1,5 @@
 import pygame
 import json
-from AppKit import NSScreen
 
 def pars_json(file):
     
@@ -30,22 +29,9 @@ json_data = pars_json("../data/json.json")
 y_dimension = json_data["ydimension"]
 x_dimension = json_data["xdimension"]
 
-#Find the larger dimension for the fit of the screen
-if y_dimension > x_dimension:
-  large_dimension = y_dimension
-else:
-  large_dimension = x_dimension
 
-win_x = (GRID_SIZE * x_dimension) + (large_dimension if x_dimension>y_dimension else x_dimension)*MARGIN
-win_y = (GRID_SIZE * y_dimension) + (large_dimension if y_dimension>x_dimension else y_dimension)*MARGIN
-
-screen_limit = 800-(large_dimension * MARGIN)
-
-if win_x > screen_limit or win_y > screen_limit:
-  GRID_SIZE = int(screen_limit / large_dimension)
-  win_x = (GRID_SIZE * x_dimension) + (large_dimension if x_dimension>y_dimension else x_dimension)*MARGIN
-  win_y = (GRID_SIZE * y_dimension) + (large_dimension if y_dimension>x_dimension else y_dimension)*MARGIN
-
+win_x = GRID_SIZE * x_dimension
+win_y = GRID_SIZE * y_dimension
 
 # This sets the WIDTH and HEIGHT of each grid location
 WIDTH = GRID_SIZE
@@ -61,7 +47,6 @@ for row in range(y_dimension):
     for column in range(x_dimension):
         grid[row].append((255, 255, 255))  # Append a cell
 
-#print(len(grid))
 
 #INIT OBSTACLES
 temp_row_obs = 0
@@ -115,6 +100,15 @@ done = False
  
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
+
+
+pygame.font.init() # you have to call this at the start, 
+                   # if you want to use this module.
+myfont = pygame.font.SysFont('Arial', 12)
+
+textsurface = myfont.render('r1', False, WHITE)
+
+
  
 # -------- Main Program Loop -----------
 while not done:
@@ -130,6 +124,7 @@ while not done:
         for column in range(x_dimension):
             if type(grid[row][column]) == str:
               color = (0, 0, 0)
+              screen.blit(textsurface,(0,0))
             else:
               color = grid[row][column]
             pygame.draw.rect(screen,
@@ -160,6 +155,7 @@ while not done:
 
         pygame.draw.line(screen, RED, (move_x1,move_y1), (move_x2,move_y2), 3)
 
+
     pygame.image.save(screen, "im.jpeg")
 
     # Limit to 60 frames per second
@@ -167,7 +163,6 @@ while not done:
  
     # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
-
 
  
 # Be IDLE friendly. If you forget this line, the program will 'hang'
