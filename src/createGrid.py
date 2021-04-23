@@ -30,8 +30,8 @@ y_dimension = json_data["ydimension"]
 x_dimension = json_data["xdimension"]
 
 
-win_x = GRID_SIZE * x_dimension
-win_y = GRID_SIZE * y_dimension
+win_x = GRID_SIZE * x_dimension + MARGIN*x_dimension
+win_y = GRID_SIZE * y_dimension + MARGIN*y_dimension
 
 # This sets the WIDTH and HEIGHT of each grid location
 WIDTH = GRID_SIZE
@@ -101,13 +101,13 @@ done = False
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
-
+'''
 pygame.font.init() # you have to call this at the start, 
                    # if you want to use this module.
 myfont = pygame.font.SysFont('Arial', 12)
 
 textsurface = myfont.render('r1', False, WHITE)
-
+'''
 
  
 # -------- Main Program Loop -----------
@@ -124,7 +124,7 @@ while not done:
         for column in range(x_dimension):
             if type(grid[row][column]) == str:
               color = (0, 0, 0)
-              screen.blit(textsurface,(0,0))
+              #screen.blit(textsurface,(0,0))
             else:
               color = grid[row][column]
             pygame.draw.rect(screen,
@@ -156,7 +156,7 @@ while not done:
         pygame.draw.line(screen, RED, (move_x1,move_y1), (move_x2,move_y2), 3)
 
 
-    pygame.image.save(screen, "im.jpeg")
+    pygame.image.save(screen, "out_grid.png")
 
     # Limit to 60 frames per second
     clock.tick(60)
@@ -168,3 +168,5 @@ while not done:
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.
 pygame.quit()
+
+import heatmap
