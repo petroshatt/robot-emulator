@@ -47,7 +47,9 @@ sb.heatmap(dataset, cmap="Blues", vmin= 0, vmax=np.amax(grid),
            linewidth=0.3, cbar_kws={"shrink": .8}, square=True)
 plt.savefig("out_heatmap.png")
 
-#pickle.dump(fig, open('FigureObject.fig.pickle', 'wb'))
+pickle.dump(fig, open('fig1.pkl', 'wb'))
 
 plt.show()
+
+
 

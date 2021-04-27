@@ -1,6 +1,6 @@
 {
-  "xdimension": 100,
-  "ydimension": 100,
+  "xdimension": 500,
+  "ydimension": 500,
   "grid_size": 10,
 
   "obstacle": [
