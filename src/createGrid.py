@@ -3,7 +3,10 @@ import json
 import datetime
 
 def txtOutput():
-  file1 = open("output_metrics.txt","w")
+
+  filename_txt = "stats--" + datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S") + ".txt"
+
+  file1 = open(filename_txt,"w")
 
   ts = datetime.datetime.now().timestamp()
   ts_str = "Current Timestamp: " + str(ts) + "\n"
@@ -58,7 +61,7 @@ GRID_SIZE = json_data["grid_size"]
 y_dimension = json_data["ydimension"]
 x_dimension = json_data["xdimension"]
 
-if x_dimension or y_dimension > 2000:
+if (x_dimension or y_dimension) > 2000:
   DISPLAY = False
 
 
@@ -143,13 +146,13 @@ if DISPLAY==True:
   # Used to manage how fast the screen updates
   clock = pygame.time.Clock()
 
-  '''
+  
   pygame.font.init() # you have to call this at the start, 
                      # if you want to use this module.
-  myfont = pygame.font.SysFont('Arial', 12)
+  myfont = pygame.font.SysFont('Arial', 7)
 
-  textsurface = myfont.render('r1', False, WHITE)
-  '''
+  textsurface = myfont.render('r1', False, RED)
+  
 
   saved_counter = 1
 
@@ -168,7 +171,6 @@ while DISPLAY:
         for column in range(x_dimension):
             if type(grid[row][column]) == str:
               color = (0, 0, 0)
-              #screen.blit(textsurface,(0,0))
             else:
               color = grid[row][column]
             pygame.draw.rect(work_surface,
@@ -177,6 +179,12 @@ while DISPLAY:
                               (MARGIN + HEIGHT) * row + MARGIN,
                                WIDTH,
                                HEIGHT])
+
+            if type(grid[row][column]) == str:
+              textsurface = myfont.render(grid[row][column], False, RED)
+              rob_y = GRID_SIZE*row + MARGIN*row
+              rob_x = GRID_SIZE*column + MARGIN*column +2
+              work_surface.blit(textsurface,(rob_x,rob_y))              
             #pygame.draw.line(screen, RED, (600,300), (200,300), 3)
 
     # Draw the lines
@@ -204,8 +212,9 @@ while DISPLAY:
 
         pygame.draw.line(work_surface, line_color, (move_x1,move_y1), (move_x2,move_y2), 1)
 
+    filename_grid = "grid--" + datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S") + ".png"
 
-    pygame.image.save(work_surface, "out_grid.png")
+    pygame.image.save(work_surface, filename_grid)
 
      
     if saved_counter==1:

@@ -5,6 +5,9 @@ import numpy as np
 import random
 import json
 import pickle
+import datetime
+
+filename_heatmap = "heatmap--" + datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S") + ".png"
 
 def pars_json(file):
     
@@ -23,7 +26,6 @@ y_dimension = json_data["ydimension"]
 x_dimension = json_data["xdimension"]
 
 grid = np.zeros((y_dimension,x_dimension))
-
 
 num_of_rob = len(json_data["robots_movements"])
 
@@ -45,7 +47,7 @@ fig, ax = plt.subplots(figsize=(11, 9))
 # plot heatmap
 sb.heatmap(dataset, cmap="Blues", vmin= 0, vmax=np.amax(grid),
            linewidth=0.3, cbar_kws={"shrink": .8}, square=True)
-plt.savefig("out_heatmap.png")
+plt.savefig(filename_heatmap)
 
 pickle.dump(fig, open('fig1.pkl', 'wb'))
 
