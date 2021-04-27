@@ -1,7 +1,7 @@
 {
-  "xdimension": 20,
-  "ydimension": 20,
-  "tile_size":  10,
+  "xdimension": 100,
+  "ydimension": 100,
+  "grid_size": 10,
 
   "obstacle": [
     {
@@ -60,6 +60,7 @@
   "robots_movements": [
     {
       "robot_name": "r1",
+      "line_color": "(255,0,0)",
       "move": [
         [
           1,
@@ -101,6 +102,7 @@
     },
     {
       "robot_name": "r2",
+      "line_color": "(0,255,0)",
       "move": [
         [
           2,
