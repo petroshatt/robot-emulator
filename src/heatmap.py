@@ -51,6 +51,8 @@ plt.savefig(filename_heatmap)
 
 pickle.dump(fig, open('fig1.pkl', 'wb'))
 
+print("Heatmap saved as: " + filename_heatmap +"\n")
+
 plt.show()
 
 

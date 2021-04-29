@@ -28,6 +28,8 @@ def txtOutput():
   movements_str = "Number of Movements: " + str(movements_count) + "\n"
   file1.write(movements_str)
 
+  print("Stats saved as: ", filename_txt)
+
 
 def pars_json(file):
     
@@ -84,6 +86,13 @@ if DISPLAY==True:
       for column in range(x_dimension):
           grid[row].append((255, 255, 255))  # Append a cell
 
+  #INIT AXIS
+  for i in range(y_dimension):
+    grid[i][0] = i+1
+
+  for i in range(x_dimension):
+    grid[0][i] = i+1
+
 
   #INIT OBSTACLES
   temp_row_obs = 0
@@ -106,7 +115,7 @@ if DISPLAY==True:
       temp_row_obs = json_data["obstacle"][i]["group_pos"][j][0]
       temp_col_obs = json_data["obstacle"][i]["group_pos"][j][1]
       #print(type(temp_col_obs))
-      grid[temp_row_obs-1][temp_col_obs-1] = (int(color1),int(color2),int(color3))
+      grid[temp_row_obs][temp_col_obs] = (int(color1),int(color2),int(color3))
 
 
   #INIT ROBOTS
@@ -118,7 +127,7 @@ if DISPLAY==True:
   for i in range(num_of_robots):
     temp_row_rob = json_data["robots"][i]["robot_pos_x"]
     temp_col_rob = json_data["robots"][i]["robot_pos_y"]
-    grid[temp_row_rob-1][temp_col_rob-1] = json_data["robots"][i]["robot_name"]
+    grid[temp_row_rob][temp_col_rob] = json_data["robots"][i]["robot_name"]
 
 
 
@@ -169,7 +178,9 @@ while DISPLAY:
     # Draw the grid
     for row in range(y_dimension):
         for column in range(x_dimension):
-            if type(grid[row][column]) == str:
+            if type(grid[row][column]) == int:
+              color = (0, 0, 0)
+            elif type(grid[row][column]) == str:
               color = (0, 0, 0)
             else:
               color = grid[row][column]
@@ -179,6 +190,12 @@ while DISPLAY:
                               (MARGIN + HEIGHT) * row + MARGIN,
                                WIDTH,
                                HEIGHT])
+
+            if type(grid[row][column]) == int:
+              textsurface = myfont.render(str(grid[row][column]), False, RED)
+              rob_y = GRID_SIZE*row + MARGIN*row
+              rob_x = GRID_SIZE*column + MARGIN*column +2
+              work_surface.blit(textsurface,(rob_x,rob_y))
 
             if type(grid[row][column]) == str:
               textsurface = myfont.render(grid[row][column], False, RED)
@@ -205,10 +222,10 @@ while DISPLAY:
         temp_move_x1 = json_data["robots_movements"][k-1]["move"][i][1]
         temp_move_x2 = json_data["robots_movements"][k-1]["move"][i+1][1]
 
-        move_y1 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_y1-1)) + MARGIN*temp_move_y1 + k*1
-        move_y2 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_y2-1)) + MARGIN*temp_move_y2 + k*1
-        move_x1 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_x1-1)) + MARGIN*temp_move_x1 + k*1
-        move_x2 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_x2-1)) + MARGIN*temp_move_x2 + k*1
+        move_y1 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_y1)) + MARGIN*temp_move_y1 + k*1
+        move_y2 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_y2)) + MARGIN*temp_move_y2 + k*1
+        move_x1 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_x1)) + MARGIN*temp_move_x1 + k*1
+        move_x2 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_x2)) + MARGIN*temp_move_x2 + k*1
 
         pygame.draw.line(work_surface, line_color, (move_x1,move_y1), (move_x2,move_y2), 1)
 
@@ -218,7 +235,7 @@ while DISPLAY:
 
      
     if saved_counter==1:
-      print("saved")
+      print("\nGrid saved as: " + filename_grid)
     saved_counter+=1
 
     DISPLAY = False
