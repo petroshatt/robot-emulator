@@ -60,15 +60,15 @@ MARGIN = 1
 GRID_SIZE = json_data["grid_size"]
 
 #Set the dimensions of the grid
-y_dimension = json_data["ydimension"]
-x_dimension = json_data["xdimension"]
+y_dimension = json_data["ydimension"]+1
+x_dimension = json_data["xdimension"]+1
 
 if (x_dimension or y_dimension) > 2000:
   DISPLAY = False
 
 
 win_x = GRID_SIZE * x_dimension + MARGIN*x_dimension
-win_y = GRID_SIZE * y_dimension + MARGIN*y_dimension
+win_y = GRID_SIZE * y_dimension + MARGIN*y_dimension +GRID_SIZE*2
 
 # This sets the WIDTH and HEIGHT of each grid location
 WIDTH = GRID_SIZE
@@ -88,10 +88,10 @@ if DISPLAY==True:
 
   #INIT AXIS
   for i in range(y_dimension):
-    grid[i][0] = i+1
+    grid[i][0] = i
 
   for i in range(x_dimension):
-    grid[0][i] = i+1
+    grid[0][i] = i
 
 
   #INIT OBSTACLES
@@ -173,17 +173,22 @@ while DISPLAY:
             DISPLAY = False
  
     # Set the screen background
-    screen.fill(BLACK)
+    work_surface.fill(BLACK)
  
     # Draw the grid
     for row in range(y_dimension):
         for column in range(x_dimension):
+
+            #case tile is GRID AXIS
             if type(grid[row][column]) == int:
               color = (0, 0, 0)
+            #case tile is ROBOT
             elif type(grid[row][column]) == str:
               color = (0, 0, 0)
+            #case tile is OBSTACLE
             else:
               color = grid[row][column]
+
             pygame.draw.rect(work_surface,
                              color,
                              [(MARGIN + WIDTH) * column + MARGIN,
@@ -191,18 +196,19 @@ while DISPLAY:
                                WIDTH,
                                HEIGHT])
 
+            #text in case tile is GRID AXIS
             if type(grid[row][column]) == int:
               textsurface = myfont.render(str(grid[row][column]), False, RED)
-              rob_y = GRID_SIZE*row + MARGIN*row
-              rob_x = GRID_SIZE*column + MARGIN*column +2
-              work_surface.blit(textsurface,(rob_x,rob_y))
+              axis_y = GRID_SIZE*row + MARGIN*row
+              axis_x = GRID_SIZE*column + MARGIN*column +2
+              work_surface.blit(textsurface,(axis_x,axis_y))
 
+            #text in case tile is ROBOT
             if type(grid[row][column]) == str:
               textsurface = myfont.render(grid[row][column], False, RED)
               rob_y = GRID_SIZE*row + MARGIN*row
               rob_x = GRID_SIZE*column + MARGIN*column +2
-              work_surface.blit(textsurface,(rob_x,rob_y))              
-            #pygame.draw.line(screen, RED, (600,300), (200,300), 3)
+              work_surface.blit(textsurface,(rob_x,rob_y))    
 
     # Draw the lines
     num_of_rob = len(json_data["robots_movements"])
@@ -228,6 +234,15 @@ while DISPLAY:
         move_x2 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_x2)) + MARGIN*temp_move_x2 + k*1
 
         pygame.draw.line(work_surface, line_color, (move_x1,move_y1), (move_x2,move_y2), 1)
+
+
+    label_x = 0+35
+    label_y = GRID_SIZE*y_dimension+MARGIN*y_dimension+2
+
+    myfont = pygame.font.SysFont('Arial', 20)
+    textsurface = myfont.render(str(json_data["label"]), False, RED)
+    work_surface.blit(textsurface,(label_x,label_y))  
+
 
     filename_grid = "grid--" + datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S") + ".png"
 
