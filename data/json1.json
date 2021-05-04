@@ -1,0 +1,19 @@
+{
+  "xdimension": 100,
+  "ydimension": 100,
+  "grid_size": 25,
+
+  "label": "e",
+
+  "obstacle": [],
+  
+  "robots": [],
+
+  "robots_movements": [
+    ]
+   }
+    ],
+    
+  "restart": "false",
+  "end": "false"
+}

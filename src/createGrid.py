@@ -1,6 +1,9 @@
 import pygame
 import json
 import datetime
+import sys
+from threading import Thread
+import server
 
 # Define some colors
 BLACK = (0, 0, 0)
@@ -292,12 +295,27 @@ def run():
 
     draw()
 
-
+def runTCP():
+  global PORT
+  while True:
+    tenmp = server.run_server(PORT)
+    #print(PORT)
+    '''if () .....
+    edo tha bazeis sthn json data ton tipo toy neo stixioy 
+    me ena appent h  (len -1 )
+    ayto tha menei synexeia anoixto 
+    '''
 
 # -------- Main Program Loop -----------
 if __name__ == "__main__":
 
+  if len(sys.argv) > 1:
+    global PORT
+    PORT = sys.argv[1]
+    t = Thread(target = runTCP).start() 
+
   reloadJson()
+
   initWindow()
   initGrid()
   run()
