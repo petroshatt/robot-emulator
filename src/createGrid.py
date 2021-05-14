@@ -3,7 +3,7 @@ import json
 import datetime
 import sys
 from threading import Thread
-#import server
+import server
 import time
 
 # Define some colors
@@ -300,15 +300,22 @@ def draw():
   pygame.display.flip()
 
 
+global RECEIVE
+RECEIVE = False
+
 def run():
   global clock
-  #global json_data
+  global RECEIVE
   while not done:
     # Limit to 60 frames per second
     clock.tick()
 
     eventLoop()
-    reloadJson()
+
+    if server.finished == True:
+      reloadJson()
+      server.finished = False
+
     initObstacles()
     initRobots()
 
@@ -316,21 +323,20 @@ def run():
 
 
 
-'''
 def runTCP():
-  global PORT
-  while True:
-    temp = server.run_server(PORT)
-'''
+  global PORT, RECEIVE
+  server.run_TCP(PORT)
+
+
 
 # -------- Main Program Loop -----------
 if __name__ == "__main__":
-  '''
+  
   if len(sys.argv) > 1:
     global PORT
     PORT = sys.argv[1]
     t = Thread(target = runTCP).start() 
-  '''
+  
   reloadJson()
 
   initWindow()
@@ -342,5 +348,5 @@ if __name__ == "__main__":
 
   pygame.quit()
 
-  import heatmap
+  #import heatmap
 
