@@ -1,19 +1,13 @@
 {
-  "xdimension": 100,
-  "ydimension": 100,
-  "grid_size": 25,
-
-  "label": "e",
-
-  "obstacle": [],
-  
-  "robots": [],
-
-  "robots_movements": [
+    "obstacle": [
+        {
+            "group_color": "(255,0,0)",
+            "group_pos": [
+                [
+                    23,
+                    3
+                ]
+            ]
+        }
     ]
-   }
-    ],
-    
-  "restart": "false",
-  "end": "false"
 }
