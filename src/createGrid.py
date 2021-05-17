@@ -38,6 +38,7 @@ def reloadJson1():
 json_data = pars_json("../data/json.json")
 
 
+
 # Initialize pygame
 pygame.init()
  
@@ -63,6 +64,7 @@ MARGIN = 2
 GRID_SIZE = json_data["grid_size"]
 
 TILE_SCROLL = 3
+WINDOW_DIM = 800
 
 #Set the dimensions of the grid
 y_dimension = json_data["ydimension"]+1
@@ -82,6 +84,8 @@ done = False
 
 scroll_x = 0
 scroll_y = 0
+
+white_tiles_counter = 0
 
 def txtOutput():
 
@@ -127,7 +131,7 @@ def initWindow():
   DEPTH = 32
   FLAGS = 0
   #screen = pygame.display.set_mode(DISPLAY_SIZE, FLAGS, DEPTH)
-  screen = pygame.display.set_mode((800,800))
+  screen = pygame.display.set_mode((WINDOW_DIM,WINDOW_DIM))
 
 
 
@@ -214,7 +218,7 @@ def eventLoop():
         elif event.key == pygame.K_DOWN:
           #print("down")
           #scroll_y = scroll_y - (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL)
-          scroll_y = max(scroll_y - (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL), -(TILE_SCROLL*800))
+          scroll_y = max(scroll_y - (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL), -(map_height-WINDOW_DIM))
         elif event.key == pygame.K_LEFT:
           #print("left")
           #scroll_x = scroll_x + (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL)
@@ -222,12 +226,14 @@ def eventLoop():
         elif event.key == pygame.K_RIGHT:
           #print("right")
           #scroll_x = scroll_x - (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL)
-          scroll_x = max(scroll_x - (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL), -(TILE_SCROLL*800))
+          scroll_x = max(scroll_x - (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL), -(map_width-WINDOW_DIM))
 
 def draw():
 
   global num_of_rob
   global num_of_moves
+  #global line_color
+  global white_tiles_counter
 
   # Draw the grid
   for row in range(y_dimension):
@@ -239,16 +245,26 @@ def draw():
       #case tile is ROBOT
       elif type(grid[row][column]) == str:
         color = (0, 0, 0)
-      #case tile is OBSTACLE
+      #case tile is OBSTACLE OR NOTHING
       else:
         color = grid[row][column]
 
-      pygame.draw.rect(main_map,
-                       color,
-                       [(MARGIN + WIDTH) * column + MARGIN,
-                        (MARGIN + HEIGHT) * row + MARGIN,
-                         WIDTH,
-                         HEIGHT])
+      if color == (255,255,255):
+        if white_tiles_counter == 0:
+          pygame.draw.rect(main_map,
+                           color,
+                           [(MARGIN + WIDTH) * column + MARGIN,
+                            (MARGIN + HEIGHT) * row + MARGIN,
+                             WIDTH,
+                             HEIGHT])
+
+      elif color != (255,255,255):
+        pygame.draw.rect(main_map,
+                 color,
+                 [(MARGIN + WIDTH) * column + MARGIN,
+                  (MARGIN + HEIGHT) * row + MARGIN,
+                   WIDTH,
+                   HEIGHT])
 
       #text in case tile is GRID AXIS
       if type(grid[row][column]) == int:
@@ -264,6 +280,8 @@ def draw():
         rob_x = GRID_SIZE*column + MARGIN*column +2
         main_map.blit(textsurface,(rob_x,rob_y))  
 
+  white_tiles_counter = 1
+
   # Draw the lines
   try:
     num_of_rob = len(json_data["robots_movements"])
@@ -274,27 +292,27 @@ def draw():
   for k in range(num_of_rob):
 
     if no_moves==0:
-      num_of_moves = len(json_data["robots_movements"][k-1]["move"])-1
+      num_of_moves = len(json_data["robots_movements"][k-1]["move"])
       line_color = json_data["robots_movements"][k-1]["line_color"]
       line_color = line_color.split("(")
       line_color = line_color[1].split(")")
       color1, color2, color3 = line_color[0].split(",")
       line_color = (int(color1),int(color2),int(color3))
 
-    for i in range(num_of_moves):
+      for i in range(num_of_moves-1):
 
-      if no_moves==0:
-        temp_move_y1 = json_data["robots_movements"][k-1]["move"][i][0]
-        temp_move_y2 = json_data["robots_movements"][k-1]["move"][i+1][0]
-        temp_move_x1 = json_data["robots_movements"][k-1]["move"][i][1]
-        temp_move_x2 = json_data["robots_movements"][k-1]["move"][i+1][1]
+        if no_moves==0:
+          temp_move_y1 = json_data["robots_movements"][k-1]["move"][i][0]
+          temp_move_y2 = json_data["robots_movements"][k-1]["move"][i+1][0]
+          temp_move_x1 = json_data["robots_movements"][k-1]["move"][i][1]
+          temp_move_x2 = json_data["robots_movements"][k-1]["move"][i+1][1]
 
-        move_y1 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_y1)) + MARGIN*temp_move_y1 + k*1
-        move_y2 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_y2)) + MARGIN*temp_move_y2 + k*1
-        move_x1 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_x1)) + MARGIN*temp_move_x1 + k*1
-        move_x2 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_x2)) + MARGIN*temp_move_x2 + k*1
+          move_y1 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_y1)) + MARGIN*temp_move_y1 + k*1
+          move_y2 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_y2)) + MARGIN*temp_move_y2 + k*1
+          move_x1 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_x1)) + MARGIN*temp_move_x1 + k*1
+          move_x2 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_x2)) + MARGIN*temp_move_x2 + k*1
 
-      pygame.draw.line(main_map, line_color, (move_x1,move_y1), (move_x2,move_y2), 3)   
+        pygame.draw.line(main_map, line_color, (move_x1,move_y1), (move_x2,move_y2), 3)   
 
   screen.blit(main_map, (scroll_x, scroll_y))
   pygame.display.flip()

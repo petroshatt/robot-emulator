@@ -1,13 +1,22 @@
 {
-  "obstacle": [
-    {
-      "group_color": "(255,0,0)",
-      "group_pos": [
-        [
-          23,
-          3
-        ]
-      ]
-    }
-  ]
+    "obstacle": [
+        {
+            "group_color": "(255,0,0)",
+            "group_pos": [
+                [
+                    23,
+                    3
+                ]
+            ]
+        },
+        {
+            "group_color": "(0,255,0)",
+            "group_pos": [
+                [
+                    15,
+                    15
+                ]
+            ]
+        }
+    ]
 }

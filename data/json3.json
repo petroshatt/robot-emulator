@@ -1,0 +1,32 @@
+{
+  "robots_movements": [
+    {
+      "robot_name": "r1",
+      "line_color": "(255,0,0)",
+      "move": [
+        [
+          3,
+          7
+        ],
+        [
+          3,
+          8
+        ]
+      ]
+    },
+    {
+      "robot_name": "r2",
+      "line_color": "(0,255,0)",
+      "move": [
+        [
+          4,
+          7
+        ],
+        [
+          4,
+          8
+        ]
+      ]
+    }
+  ]
+}
