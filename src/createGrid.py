@@ -314,6 +314,46 @@ def draw():
 
         pygame.draw.line(main_map, line_color, (move_x1,move_y1), (move_x2,move_y2), 3)   
 
+  #Exit Lines
+  try:
+    num_of_exits = len(json_data["exits"])
+  except:
+    num_of_exits = 0
+
+  for k in range(num_of_exits):
+    upper_left_x = GRID_SIZE * json_data["exits"][k]["exit_pos_x"] + MARGIN * json_data["exits"][k]["exit_pos_x"] + MARGIN
+    upper_left_y = GRID_SIZE * json_data["exits"][k]["exit_pos_y"] + MARGIN * json_data["exits"][k]["exit_pos_y"] + MARGIN
+
+    exit_color = json_data["exits"][k]["exit_color"]
+    exit_color = exit_color.split("(")
+    exit_color = exit_color[1].split(")")
+    color1, color2, color3 = exit_color[0].split(",")
+    exit_color = (int(color1),int(color2),int(color3))
+
+    if json_data["exits"][k]["direction"] == "U":
+      exit_x1 = upper_left_x
+      exit_y1 = upper_left_y
+      exit_x2 = upper_left_x + GRID_SIZE - MARGIN
+      exit_y2 = upper_left_y
+    elif json_data["exits"][k]["direction"] == "D":
+      exit_x1 = upper_left_x
+      exit_y1 = upper_left_y + GRID_SIZE - MARGIN
+      exit_x2 = upper_left_x + GRID_SIZE - MARGIN
+      exit_y2 = upper_left_y + GRID_SIZE - MARGIN
+    elif json_data["exits"][k]["direction"] == "L":
+      exit_x1 = upper_left_x
+      exit_y1 = upper_left_y
+      exit_x2 = upper_left_x 
+      exit_y2 = upper_left_y + GRID_SIZE - MARGIN
+    elif json_data["exits"][k]["direction"] == "R":
+      exit_x1 = upper_left_x + GRID_SIZE - MARGIN
+      exit_y1 = upper_left_y
+      exit_x2 = upper_left_x + GRID_SIZE - MARGIN
+      exit_y2 = upper_left_y + GRID_SIZE - MARGIN
+
+    pygame.draw.line(main_map, exit_color, (exit_x1,exit_y1), (exit_x2,exit_y2), 3) 
+
+      
   screen.blit(main_map, (scroll_x, scroll_y))
   pygame.display.flip()
 

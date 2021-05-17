@@ -139,6 +139,21 @@
       ]
     }
     ],
+
+  "exits": [
+    {
+      "direction": "R",
+      "exit_color": "(0,255,0)",
+      "exit_pos_x": 7,
+      "exit_pos_y": 7
+    },
+    {
+      "direction": "D",
+      "exit_color": "(0,255,255)",
+      "exit_pos_x": 9,
+      "exit_pos_y": 9
+    }
+  ],
     
   "restart": "false",
   "end": "false"
