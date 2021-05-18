@@ -5,7 +5,7 @@ import socket
 global finished
 finished = False
 
-def run_TCP(PORT):
+def run_TCP(PORT, stop_thread):
 
     global finished
 
@@ -13,7 +13,8 @@ def run_TCP(PORT):
 
     PORT = int(PORT)
 
-    print("\n Server is listing on port :", PORT, "\n")
+    print("\n--------------- File Exchange ---------------\n")
+    print(" Server is listing on port :", PORT, "\n")
     s.bind(('', PORT)) 
     s.listen(10)
 
@@ -24,7 +25,7 @@ def run_TCP(PORT):
 
         if finished == False:
 
-            file = open("../data/json.json", "wb") 
+            file = open("../data/json.json", "wb")
             print("\n Copied file name will be json.json at server side\n")
 
             # Send a hello message to client
@@ -39,15 +40,11 @@ def run_TCP(PORT):
 
            
             file.close()
-            print("\n File has been copied successfully \n")
+            print(" File has been copied successfully \n")
 
             finished = True
 
-            '''
             conn.close()
-            print("\n Server closed the connection \n")
 
+        if stop_thread == True:
             break
-            '''
-
-#run_TCP(9898)

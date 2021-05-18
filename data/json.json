@@ -1,26 +1,11 @@
-{  
-  "robots": [
-    {
-      "robot_name": "r3",
-      "robot_pos_x": 1,
-      "robot_pos_y": 15
-    }
-  ],
-
-  "robots_movements": [
-    {
-      "robot_name": "r3",
-      "line_color": "(0,0,255)",
-      "move": [
-        [
-          1,
-          15
-        ],
-        [
-          2,
-          15
-        ]
-      ]
-    }
-  ]
+{
+    "xdimension": 100,
+    "ydimension": 100,
+    "grid_size": 25,
+    "label": "Run1",
+    "obstacle": [],
+    "robots": [],
+    "robots_movements": [],
+    "exits": [],
+    "end": "false"
 }

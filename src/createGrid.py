@@ -41,9 +41,11 @@ json_data = pars_json("../data/json.json")
 
 # Initialize pygame
 pygame.init()
+
+LABEL = json_data["label"]
  
 # Set title of screen
-pygame.display.set_caption("Grid")
+pygame.display.set_caption(LABEL)
 
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
@@ -82,42 +84,53 @@ main_map = main_map.convert()
 done = False
 
 
+
+
 scroll_x = 0
 scroll_y = 0
 
 white_tiles_counter = 0
 
+
+stop_thread = False
+
+
 def txtOutput():
 
-  filename_txt = "stats--" + datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S") + ".txt"
+  try:
 
-  file1 = open(filename_txt,"w")
+    filename_txt = LABEL + "--stats--" + datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S") + ".txt"
 
-  ts = datetime.datetime.now().timestamp()
-  ts_str = "Current Timestamp: " + str(ts) + "\n"
-  file1.write(ts_str)
+    file1 = open(filename_txt,"w")
 
-  readable = datetime.datetime.fromtimestamp(ts).isoformat()
-  rd_str = "Current Date and Time: " + str(readable) + "\n"
-  file1.write(rd_str)
+    ts = datetime.datetime.now().timestamp()
+    ts_str = "Current Timestamp: " + str(ts) + "\n"
+    file1.write(ts_str)
 
-  robots_count = len(json_data["robots"])
-  robots_str = "Number of Robots: " + str(robots_count) + "\n"
-  file1.write(robots_str)
+    readable = datetime.datetime.fromtimestamp(ts).isoformat()
+    rd_str = "Current Date and Time: " + str(readable) + "\n"
+    file1.write(rd_str)
 
-  movements_count = 0
+    robots_count = len(json_data["robots"])
+    robots_str = "Number of Robots: " + str(robots_count) + "\n"
+    file1.write(robots_str)
 
-  for i in range(len(json_data["robots_movements"])):
-    movements_count += len(json_data["robots_movements"][i]["move"])
+    movements_count = 0
 
-  movements_str = "Number of Movements: " + str(movements_count) + "\n"
-  file1.write(movements_str)
+    for i in range(len(json_data["robots_movements"])):
+      movements_count += len(json_data["robots_movements"][i]["move"])
 
-  print("Stats saved as: ", filename_txt)
+    movements_str = "Number of Movements: " + str(movements_count) + "\n"
+    file1.write(movements_str)
+
+    print("Stats saved as: ", filename_txt)
+
+  except:
+    print("\nMissing Elements for the statistics file.\n")
 
 
 def gridOutput():
-  filename_grid = "grid--" + datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S") + ".png"
+  filename_grid = LABEL + "--grid--" + datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S") + ".png"
   pygame.image.save(main_map, filename_grid)
   print("\nGrid saved as: " + filename_grid)
 
@@ -207,9 +220,11 @@ def eventLoop():
   global done
   global scroll_x
   global scroll_y
+  global stop_thread
   for event in pygame.event.get():  # User did something
       if event.type == pygame.QUIT:  # If user clicked close
           done = True
+          stop_thread = True
       elif event.type == pygame.KEYDOWN:
         if event.key == pygame.K_UP:
           #print("up")
@@ -364,9 +379,16 @@ RECEIVE = False
 def run():
   global clock
   global RECEIVE
+  global done
   while not done:
     # Limit to 60 frames per second
     clock.tick()
+
+    try:
+      if json_data["end"] == "true":
+        done = True
+    except:
+      done = False
 
     eventLoop()
 
@@ -381,30 +403,41 @@ def run():
 
 
 
+
+
 def runTCP():
-  global PORT, RECEIVE
-  server.run_TCP(PORT)
+  global PORT, RECEIVE, stop_thread
+  server.run_TCP(PORT, stop_thread)
 
 
 
 # -------- Main Program Loop -----------
 if __name__ == "__main__":
-  
-  if len(sys.argv) > 1:
-    global PORT
-    PORT = sys.argv[1]
-    t = Thread(target = runTCP).start() 
-  
-  reloadJson()
 
-  initWindow()
-  initGrid()
-  run()
+  try: 
 
-  gridOutput()
-  txtOutput()
+    t = Thread(target = runTCP)
+    t.daemon = True # die when the main thread dies
+    if len(sys.argv) > 1:
+      global PORT
+      PORT = sys.argv[1] 
+      t.start()
 
-  pygame.quit()
 
-  #import heatmap
+    reloadJson()
+
+    initWindow()
+    initGrid()
+    run()
+
+    gridOutput()
+    txtOutput()
+
+    pygame.quit()
+
+    #import heatmap
+
+  except (KeyboardInterrupt, SystemExit):
+    print("\nProgram Terminated by User.")
+    sys.exit()
 
