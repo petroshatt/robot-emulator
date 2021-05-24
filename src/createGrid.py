@@ -12,87 +12,79 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
+global json_data
 
-def pars_json(file):
-    
-  f = open(file)
-  
-  data = json.load(f)
+global LABEL, clock, myfont, textsurface, screen, MARGIN, GRID_SIZE, TILE_SCROLL, WINDOW_DIM
+global y_dimension, x_dimension, WIDTH, HEIGHT
+global map_width, map_height, main_map, done, scroll_x, scroll_y, white_tiles_counter, stop_thread
 
-  f.close()
 
-  return data
+stop_thread = False
 
 
 def reloadJson():
   global json_data 
-  json_data = pars_json("../data/json.json")
-
-def reloadJson1():
-  global json_data 
-  json_data = pars_json("../data/json1.json")
+  json_data = json_from_tcp
 
 
 
-#json_data = pars_json("../data/json.json")
-json_data = pars_json("../data/json.json")
+def setup():
+  global json_data, LABEL, clock, myfont, textsurface, screen, MARGIN, GRID_SIZE, TILE_SCROLL, WINDOW_DIM
+  global y_dimension, x_dimension, WIDTH, HEIGHT
+  # Initialize pygame
+  pygame.init()
+
+  LABEL = json_data["label"]
+   
+  # Set title of screen
+  pygame.display.set_caption(LABEL)
+
+  # Used to manage how fast the screen updates
+  clock = pygame.time.Clock()
+
+  pygame.font.init() # you have to call this at the start, 
+                     # if you want to use this module.
+  myfont = pygame.font.SysFont('Arial', 20)
+
+  textsurface = myfont.render('r1', False, RED)
+
+  screen = pygame.display.set_mode((0,0), 0, 0)
 
 
 
-# Initialize pygame
-pygame.init()
+  # This sets the margin between each cell
+  MARGIN = 2
+  #This sets the default size of each cell on the grid
+  GRID_SIZE = json_data["grid_size"]
 
-LABEL = json_data["label"]
- 
-# Set title of screen
-pygame.display.set_caption(LABEL)
+  TILE_SCROLL = 3
+  WINDOW_DIM = 800
 
-# Used to manage how fast the screen updates
-clock = pygame.time.Clock()
+  #Set the dimensions of the grid
+  y_dimension = json_data["ydimension"]+1
+  x_dimension = json_data["xdimension"]+1
 
-pygame.font.init() # you have to call this at the start, 
-                   # if you want to use this module.
-myfont = pygame.font.SysFont('Arial', 20)
+  # This sets the WIDTH and HEIGHT of each grid location
+  WIDTH = GRID_SIZE
+  HEIGHT = GRID_SIZE
 
-textsurface = myfont.render('r1', False, RED)
-
-screen = pygame.display.set_mode((0,0), 0, 0)
-
+  global map_width, map_height, main_map, done, scroll_x, scroll_y, white_tiles_counter, stop_thread
 
 
-# This sets the margin between each cell
-MARGIN = 2
-#This sets the default size of each cell on the grid
-GRID_SIZE = json_data["grid_size"]
+  map_width = GRID_SIZE*x_dimension + MARGIN*x_dimension
+  map_height = GRID_SIZE*y_dimension + MARGIN*y_dimension
+  main_map = pygame.Surface((map_width, map_height))
+  main_map = main_map.convert()
+  done = False
 
-TILE_SCROLL = 3
-WINDOW_DIM = 800
+  scroll_x = 0
+  scroll_y = 0
 
-#Set the dimensions of the grid
-y_dimension = json_data["ydimension"]+1
-x_dimension = json_data["xdimension"]+1
-
-# This sets the WIDTH and HEIGHT of each grid location
-WIDTH = GRID_SIZE
-HEIGHT = GRID_SIZE
+  white_tiles_counter = 0
 
 
-map_width = GRID_SIZE*x_dimension + MARGIN*x_dimension
-map_height = GRID_SIZE*y_dimension + MARGIN*y_dimension
-main_map = pygame.Surface((map_width, map_height))
-main_map = main_map.convert()
-done = False
+  stop_thread = False
 
-
-
-
-scroll_x = 0
-scroll_y = 0
-
-white_tiles_counter = 0
-
-
-stop_thread = False
 
 
 def txtOutput():
@@ -384,6 +376,11 @@ def run():
     # Limit to 60 frames per second
     clock.tick()
 
+    LABEL = json_data["label"]
+   
+    # Set title of screen
+    pygame.display.set_caption(LABEL)
+
     try:
       if json_data["end"] == "true":
         done = True
@@ -392,9 +389,8 @@ def run():
 
     eventLoop()
 
-    if server.finished == True:
-      reloadJson()
-      server.finished = False
+    reloadJson()
+
 
     initObstacles()
     initRobots()
@@ -406,14 +402,24 @@ def run():
 
 
 def runTCP():
-  global PORT, RECEIVE, stop_thread
-  server.run_TCP(PORT, stop_thread)
+
+  global PORT, json_from_tcp, read, stop_thread
+
+  while True:
+    string_from_tcp, read = server.run_TCP(PORT, stop_thread)
+
+    json_from_tcp = json.loads(string_from_tcp)
+
+    if stop_thread == True:
+      break
+
+  
 
 
 
 # -------- Main Program Loop -----------
 if __name__ == "__main__":
-
+  global read,json_from_tcp
   try: 
 
     t = Thread(target = runTCP)
@@ -423,18 +429,29 @@ if __name__ == "__main__":
       PORT = sys.argv[1] 
       t.start()
 
+    read = False
 
-    reloadJson()
+    count = 1
+    while read==False:
+      if count==1:
+        print("waitsend")
+        count += 1
 
-    initWindow()
-    initGrid()
-    run()
+      #print(type(json.loads(json_from_tcp)))
+    
+    if read == True:
+      reloadJson()
+      setup()
 
-    gridOutput()
-    txtOutput()
+      initWindow()
+      initGrid()
+      run()
+
+      gridOutput()
+      txtOutput()
 
     pygame.quit()
-
+    
     #import heatmap
 
   except (KeyboardInterrupt, SystemExit):
