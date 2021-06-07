@@ -46,7 +46,7 @@ def run_TCP(PORT, stop_thread):
     #Allages
     input_var = re.sub(r"\s+", "", input_var).replace('\\n','').replace("'b'",'').replace('\\r','')[2:][:-1]
 
-    print (input_var)
+    #print(input_var)
 
     conn.close()
     return input_var,True

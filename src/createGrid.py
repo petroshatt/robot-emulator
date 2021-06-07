@@ -5,6 +5,11 @@ import sys
 from threading import Thread
 import server
 import time
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sb
+import pandas as pd
+import pickle
 
 # Define some colors
 BLACK = (0, 0, 0)
@@ -13,13 +18,24 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 global json_data
-
+global heatmap_grid, heatmap_first_tile, new_json_read, robots_count, movements_count
 global LABEL, clock, myfont, textsurface, screen, MARGIN, GRID_SIZE, TILE_SCROLL, WINDOW_DIM
 global y_dimension, x_dimension, WIDTH, HEIGHT
 global map_width, map_height, main_map, done, scroll_x, scroll_y, white_tiles_counter, stop_thread
+global last_moves_list, temp_moves_list
 
-
+#Global variable to stop thread
 stop_thread = False
+
+#Global variable, is True when a new json is read
+new_json_read = False
+
+#Global variables for the statistics count
+robots_count = 0
+movements_count = 0
+
+last_moves_list = {}
+temp_moves_list = {}
 
 
 def reloadJson():
@@ -27,10 +43,10 @@ def reloadJson():
   json_data = json_from_tcp
 
 
-
 def setup():
   global json_data, LABEL, clock, myfont, textsurface, screen, MARGIN, GRID_SIZE, TILE_SCROLL, WINDOW_DIM
-  global y_dimension, x_dimension, WIDTH, HEIGHT
+  global y_dimension, x_dimension, WIDTH, HEIGHT, heatmap_grid, heatmap_first_tile
+
   # Initialize pygame
   pygame.init()
 
@@ -50,8 +66,6 @@ def setup():
 
   screen = pygame.display.set_mode((0,0), 0, 0)
 
-
-
   # This sets the margin between each cell
   MARGIN = 2
   #This sets the default size of each cell on the grid
@@ -68,8 +82,12 @@ def setup():
   WIDTH = GRID_SIZE
   HEIGHT = GRID_SIZE
 
-  global map_width, map_height, main_map, done, scroll_x, scroll_y, white_tiles_counter, stop_thread
 
+  heatmap_grid = np.zeros((y_dimension-1,x_dimension-1))
+  heatmap_first_tile = True
+
+  global map_width, map_height, main_map, done
+  global scroll_x, scroll_y, white_tiles_counter, stop_thread
 
   map_width = GRID_SIZE*x_dimension + MARGIN*x_dimension
   map_height = GRID_SIZE*y_dimension + MARGIN*y_dimension
@@ -82,43 +100,54 @@ def setup():
 
   white_tiles_counter = 0
 
-
   stop_thread = False
-
 
 
 def txtOutput():
 
+  global robots_count, movements_count
+
+  filename_txt = LABEL + "--stats--" + datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S") + ".txt"
+
+  file1 = open(filename_txt,"w")
+
+  ts = datetime.datetime.now().timestamp()
+  ts_str = "Current Timestamp: " + str(ts) + "\n"
+  file1.write(ts_str)
+
+  readable = datetime.datetime.fromtimestamp(ts).isoformat()
+  rd_str = "Current Date and Time: " + str(readable) + "\n"
+  file1.write(rd_str)
+
+  robots_str = "Number of Robots: " + str(robots_count) + "\n"
+  file1.write(robots_str)
+
+  movements_str = "Number of Movements: " + str(movements_count) + "\n"
+  file1.write(movements_str)
+
+  print("Stats saved as: ", filename_txt)
+
+
+def statsCount():
+
+  global robots_count, movements_count
+
   try:
-
-    filename_txt = LABEL + "--stats--" + datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S") + ".txt"
-
-    file1 = open(filename_txt,"w")
-
-    ts = datetime.datetime.now().timestamp()
-    ts_str = "Current Timestamp: " + str(ts) + "\n"
-    file1.write(ts_str)
-
-    readable = datetime.datetime.fromtimestamp(ts).isoformat()
-    rd_str = "Current Date and Time: " + str(readable) + "\n"
-    file1.write(rd_str)
-
-    robots_count = len(json_data["robots"])
-    robots_str = "Number of Robots: " + str(robots_count) + "\n"
-    file1.write(robots_str)
-
-    movements_count = 0
-
-    for i in range(len(json_data["robots_movements"])):
-      movements_count += len(json_data["robots_movements"][i]["move"])
-
-    movements_str = "Number of Movements: " + str(movements_count) + "\n"
-    file1.write(movements_str)
-
-    print("Stats saved as: ", filename_txt)
-
+    robots_count += len(json_data["robots"])
   except:
-    print("\nMissing Elements for the statistics file.\n")
+    pass
+
+  try:
+    for i in range(len(json_data["robots_movements"])):
+      for k in range(len(json_data["robots_movements"][i]["move"])-1):
+        stats_count_x1 = json_data["robots_movements"][i]["move"][k][0]
+        stats_count_y1 = json_data["robots_movements"][i]["move"][k][1]
+        stats_count_x2 = json_data["robots_movements"][i]["move"][k+1][0]
+        stats_count_y2 = json_data["robots_movements"][i]["move"][k+1][1]
+
+        movements_count += (abs(stats_count_x2 - stats_count_x1) + abs(stats_count_y2 - stats_count_y1))
+  except:
+    pass
 
 
 def gridOutput():
@@ -137,7 +166,6 @@ def initWindow():
   FLAGS = 0
   #screen = pygame.display.set_mode(DISPLAY_SIZE, FLAGS, DEPTH)
   screen = pygame.display.set_mode((WINDOW_DIM,WINDOW_DIM))
-
 
 
 def initGrid():
@@ -161,9 +189,11 @@ def initGrid():
   # Set the screen background
   screen.fill(BLACK)
 
+
 def init_objects():
   initObstacles()
   initRobots()
+
 
 def initObstacles():
 
@@ -192,7 +222,6 @@ def initObstacles():
 
 def initRobots():
 
-
   #INIT ROBOTS
   temp_row_rob = 0
   temp_col_rob = 0
@@ -212,35 +241,31 @@ def eventLoop():
   global done
   global scroll_x
   global scroll_y
-  global stop_thread
+  global stop_thread, new_json_read
   for event in pygame.event.get():  # User did something
       if event.type == pygame.QUIT:  # If user clicked close
           done = True
           stop_thread = True
       elif event.type == pygame.KEYDOWN:
         if event.key == pygame.K_UP:
-          #print("up")
-          #scroll_y = scroll_y + (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL)
           scroll_y = min(scroll_y + (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL), 0)
         elif event.key == pygame.K_DOWN:
-          #print("down")
-          #scroll_y = scroll_y - (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL)
           scroll_y = max(scroll_y - (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL), -(map_height-WINDOW_DIM))
         elif event.key == pygame.K_LEFT:
-          #print("left")
-          #scroll_x = scroll_x + (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL)
           scroll_x = min(scroll_x + (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL), 0)
         elif event.key == pygame.K_RIGHT:
-          #print("right")
-          #scroll_x = scroll_x - (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL)
           scroll_x = max(scroll_x - (GRID_SIZE*TILE_SCROLL+MARGIN*TILE_SCROLL), -(map_width-WINDOW_DIM))
+        new_json_read = False
+        draw()
+
 
 def draw():
 
   global num_of_rob
   global num_of_moves
-  #global line_color
-  global white_tiles_counter
+  global heatmap_first_tile
+  global white_tiles_counter, new_json_read
+  global last_moves_list
 
   # Draw the grid
   for row in range(y_dimension):
@@ -299,20 +324,31 @@ def draw():
   for k in range(num_of_rob):
 
     if no_moves==0:
-      num_of_moves = len(json_data["robots_movements"][k-1]["move"])
-      line_color = json_data["robots_movements"][k-1]["line_color"]
+
+      num_of_moves = len(json_data["robots_movements"][k]["move"])
+      line_color = json_data["robots_movements"][k]["line_color"]
       line_color = line_color.split("(")
       line_color = line_color[1].split(")")
       color1, color2, color3 = line_color[0].split(",")
       line_color = (int(color1),int(color2),int(color3))
 
+      continued_move = False
+
+      try:
+        if last_moves_list[json_data["robots_movements"][k]["robot_name"]] == json_data["robots_movements"][k]["move"][0]:
+          continued_move = True
+      except:
+        pass
+
+      last_moves_list[json_data["robots_movements"][k]["robot_name"]] = [json_data["robots_movements"][k]["move"][-1][0], json_data["robots_movements"][k]["move"][-1][1]]
+
       for i in range(num_of_moves-1):
 
         if no_moves==0:
-          temp_move_y1 = json_data["robots_movements"][k-1]["move"][i][0]
-          temp_move_y2 = json_data["robots_movements"][k-1]["move"][i+1][0]
-          temp_move_x1 = json_data["robots_movements"][k-1]["move"][i][1]
-          temp_move_x2 = json_data["robots_movements"][k-1]["move"][i+1][1]
+          temp_move_y1 = json_data["robots_movements"][k]["move"][i][0]
+          temp_move_y2 = json_data["robots_movements"][k]["move"][i+1][0]
+          temp_move_x1 = json_data["robots_movements"][k]["move"][i][1]
+          temp_move_x2 = json_data["robots_movements"][k]["move"][i+1][1]
 
           move_y1 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_y1)) + MARGIN*temp_move_y1 + k*1
           move_y2 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_y2)) + MARGIN*temp_move_y2 + k*1
@@ -320,6 +356,29 @@ def draw():
           move_x2 = GRID_SIZE/2 + (GRID_SIZE*(temp_move_x2)) + MARGIN*temp_move_x2 + k*1
 
         pygame.draw.line(main_map, line_color, (move_x1,move_y1), (move_x2,move_y2), 3)   
+
+        if new_json_read == True:
+          heatmap_y = json_data["robots_movements"][k]["move"][i+1][0]
+          heatmap_x = json_data["robots_movements"][k]["move"][i+1][1]
+
+          diff_x = abs(temp_move_x2 - temp_move_x1)
+          diff_y = abs(temp_move_y2 - temp_move_y1)
+
+          if diff_x > 0:
+            for w in range(temp_move_x1, temp_move_x1+diff_x):
+              heatmap_grid[temp_move_y1-1][w] += 1
+          if diff_y > 0:
+            for y in range(temp_move_y1, temp_move_y1+diff_y):
+              heatmap_grid[y][temp_move_x1-1] += 1
+
+          if heatmap_first_tile == True and continued_move == False and new_json_read == True:
+            heatmap_y = json_data["robots_movements"][k]["move"][i][0]
+            heatmap_x = json_data["robots_movements"][k]["move"][i][1]
+            heatmap_grid[heatmap_y-1][heatmap_x-1] += 1
+            heatmap_first_tile = False
+
+      heatmap_first_tile = True
+        
 
   #Exit Lines
   try:
@@ -372,11 +431,15 @@ def run():
   global clock
   global RECEIVE
   global done
+  global new_json_read
   while not done:
     # Limit to 60 frames per second
     clock.tick()
 
-    LABEL = json_data["label"]
+    try:
+      LABEL = json_data["label"]
+    except:
+      pass
    
     # Set title of screen
     pygame.display.set_caption(LABEL)
@@ -389,27 +452,51 @@ def run():
 
     eventLoop()
 
-    reloadJson()
+    #reloadJson()
+
+    if new_json_read == True:
+      initObstacles()
+      initRobots()
+
+      draw()
+      new_json_read = False
+      
 
 
-    initObstacles()
-    initRobots()
+def heatmap():
+  filename_heatmap = LABEL + "--heatmap--" + datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S") + ".png"
 
-    draw()
+  dataset = pd.DataFrame(heatmap_grid)
+  xl = range(1,x_dimension)
+  yl = range(1,y_dimension)
 
+  fig, ax = plt.subplots(figsize=(11, 9))
+  # plot heatmap
+  heatmap = sb.heatmap(dataset, cmap="Reds", vmin= 0, vmax=np.amax(heatmap_grid),
+           linewidth=0.3, cbar_kws={"shrink": 1}, square=True,
+           xticklabels = xl, yticklabels = yl)
+  heatmap.set_xticklabels(heatmap.get_xticklabels(), fontsize=5) 
+  heatmap.set_yticklabels(heatmap.get_yticklabels(), fontsize=5) 
+  plt.savefig(filename_heatmap)
 
+  pickle.dump(fig, open('fig1.pkl', 'wb'))
 
+  print("Heatmap saved as: " + filename_heatmap +"\n")
+
+  plt.show()
 
 
 def runTCP():
 
-  global PORT, json_from_tcp, read, stop_thread
+  global PORT, json_from_tcp, read, stop_thread, new_json_read, json_data
 
   while True:
     string_from_tcp, read = server.run_TCP(PORT, stop_thread)
 
     json_from_tcp = json.loads(string_from_tcp)
-
+    json_data = json_from_tcp
+    statsCount()
+    new_json_read = True
     if stop_thread == True:
       break
 
@@ -434,13 +521,13 @@ if __name__ == "__main__":
     count = 1
     while read==False:
       if count==1:
-        print("waitsend")
+        #print("waitsend")
         count += 1
 
       #print(type(json.loads(json_from_tcp)))
     
     if read == True:
-      reloadJson()
+      #reloadJson()
       setup()
 
       initWindow()
@@ -452,7 +539,7 @@ if __name__ == "__main__":
 
     pygame.quit()
     
-    #import heatmap
+    heatmap()
 
   except (KeyboardInterrupt, SystemExit):
     print("\nProgram Terminated by User.")
