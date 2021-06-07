@@ -18,7 +18,7 @@ def run_TCP(PORT, stop_thread):
     PORT = int(PORT)
 
     print("\n--------------- File Exchange ---------------\n")
-    print(" Server is listing on port :", PORT, "\n")
+    print("Server is listening on port :", PORT, "\n")
     s.bind(('', PORT)) 
     s.listen(10)
 
@@ -28,10 +28,10 @@ def run_TCP(PORT, stop_thread):
     conn, addr = s.accept()
     input_var = ''
 
-    print("\n Copied file name will be json.json at server side\n")
+    print("\nCopied file name will be json.json at server side\n")
 
     # Send a hello message to client
-    msg = "\n\n|---------------------------------|\n Client[IP address: "+ addr[0] + "]\n"    
+    msg = "\n\n|---------------------------------|\nClient[IP address: "+ addr[0] + "]\n"    
     conn.send(msg.encode())
     
     # Receive any data from client side
@@ -40,7 +40,7 @@ def run_TCP(PORT, stop_thread):
         input_var += str(RecvData)
         RecvData = conn.recv(1024*1024)
 
-    print(" File has been copied successfully \n")
+    print("File has been copied successfully \n")
 
 
     #Allages

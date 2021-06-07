@@ -23,6 +23,9 @@ global LABEL, clock, myfont, textsurface, screen, MARGIN, GRID_SIZE, TILE_SCROLL
 global y_dimension, x_dimension, WIDTH, HEIGHT
 global map_width, map_height, main_map, done, scroll_x, scroll_y, white_tiles_counter, stop_thread
 global last_moves_list, temp_moves_list
+global exception_flag
+
+exception_flag = False
 
 #Global variable to stop thread
 stop_thread = False
@@ -60,7 +63,7 @@ def setup():
 
   pygame.font.init() # you have to call this at the start, 
                      # if you want to use this module.
-  myfont = pygame.font.SysFont('Arial', 20)
+  myfont = pygame.font.SysFont('Arial', 17)
 
   textsurface = myfont.render('r1', False, RED)
 
@@ -217,7 +220,14 @@ def initObstacles():
     for j in range(num_of_obs):
       temp_row_obs = json_data["obstacle"][i]["group_pos"][j][0]
       temp_col_obs = json_data["obstacle"][i]["group_pos"][j][1]
-      grid[temp_row_obs][temp_col_obs] = (int(color1),int(color2),int(color3))
+      
+      #INDEX OUT OF RANGE
+      try:
+        grid[temp_row_obs][temp_col_obs] = (int(color1),int(color2),int(color3))
+      except:
+        print("\nObstacle out of range.")
+        exception_flag = True
+        sys.exit()
 
 
 def initRobots():
@@ -234,7 +244,14 @@ def initRobots():
   for i in range(num_of_robots):
     temp_row_rob = json_data["robots"][i]["robot_pos_x"]
     temp_col_rob = json_data["robots"][i]["robot_pos_y"]
-    grid[temp_row_rob][temp_col_rob] = json_data["robots"][i]["robot_name"]
+
+    #INDEX OUT OF RANGE
+    try:
+      grid[temp_row_rob][temp_col_rob] = json_data["robots"][i]["robot_name"]
+    except:
+      print("\nRobot out of range.")
+      exception_flag = True
+      sys.exit()
 
 
 def eventLoop():
@@ -488,20 +505,24 @@ def heatmap():
 
 def runTCP():
 
-  global PORT, json_from_tcp, read, stop_thread, new_json_read, json_data
+  global PORT, json_from_tcp, read, stop_thread, new_json_read, json_data, exception_flag
 
   while True:
     string_from_tcp, read = server.run_TCP(PORT, stop_thread)
 
-    json_from_tcp = json.loads(string_from_tcp)
-    json_data = json_from_tcp
-    statsCount()
-    new_json_read = True
-    if stop_thread == True:
-      break
+    try:
+      json_from_tcp = json.loads(string_from_tcp)
+      json_data = json_from_tcp
+      statsCount()
+      new_json_read = True
+      if stop_thread == True:
+        break
+    except:
+      print("\nCould not load JSON file.")
+      exception_flag = True
+      sys.exit()
 
   
-
 
 
 # -------- Main Program Loop -----------
@@ -521,14 +542,20 @@ if __name__ == "__main__":
     count = 1
     while read==False:
       if count==1:
-        #print("waitsend")
         count += 1
 
-      #print(type(json.loads(json_from_tcp)))
     
     if read == True:
-      #reloadJson()
-      setup()
+
+      if exception_flag == True:
+        sys.exit()
+
+      try:
+        setup()
+      except:
+        print("\nError setting up the grid.")
+        exception_flag = True
+        sys.exit()
 
       initWindow()
       initGrid()
@@ -541,7 +568,10 @@ if __name__ == "__main__":
     
     heatmap()
 
-  except (KeyboardInterrupt, SystemExit):
-    print("\nProgram Terminated by User.")
+  except (KeyboardInterrupt):
+    print("\nProgram Terminated by User.\n")
+    sys.exit()
+  except (SystemExit):
+    print("\nProgram Terminated.\n")
     sys.exit()
 
