@@ -65,6 +65,8 @@ def setup():
                      # if you want to use this module.
   myfont = pygame.font.SysFont('Arial', 17)
 
+  axisFont = pygame.font.SysFont('Arial', 17)
+
   textsurface = myfont.render('r1', False, RED)
 
   screen = pygame.display.set_mode((0,0), 0, 0)
