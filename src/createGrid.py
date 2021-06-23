@@ -24,6 +24,15 @@ global y_dimension, x_dimension, WIDTH, HEIGHT
 global map_width, map_height, main_map, done, scroll_x, scroll_y, white_tiles_counter, stop_thread
 global last_moves_list, temp_moves_list
 global exception_flag
+global GRAPHICS_SWITCH
+
+GRAPHICS_SWITCH = ''
+
+if(len(sys.argv) > 2):
+  GRAPHICS_SWITCH = sys.argv[2]
+  print("\nProgram will be executed with graphics.")
+else:
+  print("\nProgram will be executed without graphics.\nFor graphics, add the -G argument.\n")
 
 exception_flag = False
 
@@ -69,7 +78,8 @@ def setup():
 
   textsurface = myfont.render('r1', False, RED)
 
-  screen = pygame.display.set_mode((0,0), 0, 0)
+  if(GRAPHICS_SWITCH == '-G'):
+    screen = pygame.display.set_mode((0,0), 0, 0) #####
 
   # This sets the margin between each cell
   MARGIN = 2
@@ -97,7 +107,8 @@ def setup():
   map_width = GRID_SIZE*x_dimension + MARGIN*x_dimension
   map_height = GRID_SIZE*y_dimension + MARGIN*y_dimension
   main_map = pygame.Surface((map_width, map_height))
-  main_map = main_map.convert()
+  if(GRAPHICS_SWITCH == '-G'):
+    main_map = main_map.convert() #####
   done = False
 
   scroll_x = 0
@@ -170,7 +181,8 @@ def initWindow():
   DEPTH = 32
   FLAGS = 0
   #screen = pygame.display.set_mode(DISPLAY_SIZE, FLAGS, DEPTH)
-  screen = pygame.display.set_mode((WINDOW_DIM,WINDOW_DIM))
+  if(GRAPHICS_SWITCH == '-G'):
+    screen = pygame.display.set_mode((WINDOW_DIM,WINDOW_DIM)) #####
 
 
 def initGrid():
@@ -192,7 +204,8 @@ def initGrid():
     grid[0][i] = i
 
   # Set the screen background
-  screen.fill(BLACK)
+  if(GRAPHICS_SWITCH == '-G'):
+    screen.fill(BLACK)  #####
 
 
 def init_objects():
@@ -438,9 +451,9 @@ def draw():
 
     pygame.draw.line(main_map, exit_color, (exit_x1,exit_y1), (exit_x2,exit_y2), 3) 
 
-      
-  screen.blit(main_map, (scroll_x, scroll_y))
-  pygame.display.flip()
+  if(GRAPHICS_SWITCH == '-G'):    
+    screen.blit(main_map, (scroll_x, scroll_y)) #####
+    pygame.display.flip() ######
 
 
 global RECEIVE
@@ -461,7 +474,8 @@ def run():
       pass
    
     # Set title of screen
-    pygame.display.set_caption(LABEL)
+    if(GRAPHICS_SWITCH == '-G'):
+      pygame.display.set_caption(LABEL) ######
 
     try:
       if json_data["end"] == "true":
@@ -552,12 +566,12 @@ if __name__ == "__main__":
       if exception_flag == True:
         sys.exit()
 
-      try:
-        setup()
-      except:
-        print("\nError setting up the grid.")
-        exception_flag = True
-        sys.exit()
+      #try:
+      setup()
+      #except:
+        #print("\nError setting up the grid.")
+        #exception_flag = True
+        #sys.exit()
 
       initWindow()
       initGrid()
