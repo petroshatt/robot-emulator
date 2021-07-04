@@ -22,9 +22,6 @@ def run_TCP(PORT, stop_thread):
     s.bind(('', PORT)) 
     s.listen(10)
 
-
-    #while True:
-
     conn, addr = s.accept()
     input_var = ''
 

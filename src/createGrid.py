@@ -24,15 +24,24 @@ global y_dimension, x_dimension, WIDTH, HEIGHT
 global map_width, map_height, main_map, done, scroll_x, scroll_y, white_tiles_counter, stop_thread
 global last_moves_list, temp_moves_list
 global exception_flag
-global GRAPHICS_SWITCH
+global GRAPHICS_SWITCH, HEATMAP_SWITCH
 
-GRAPHICS_SWITCH = ''
 
-if(len(sys.argv) > 2):
-  GRAPHICS_SWITCH = sys.argv[2]
+GRAPHICS_SWITCH = False
+HEATMAP_SWITCH = False
+
+
+if('-G' in sys.argv):
+  GRAPHICS_SWITCH = True
   print("\nProgram will be executed with graphics.")
 else:
   print("\nProgram will be executed without graphics.\nFor graphics, add the -G argument.\n")
+
+if('-H' in sys.argv):
+  HEATMAP_SWITCH = True
+  print("\nProgram will be executed with heatmap.")
+else:
+  print("\nProgram will be executed without heatmap.\nFor heatmap, add the -H argument.\n")
 
 exception_flag = False
 
@@ -78,7 +87,7 @@ def setup():
 
   textsurface = myfont.render('r1', False, RED)
 
-  if(GRAPHICS_SWITCH == '-G'):
+  if(GRAPHICS_SWITCH == True):
     screen = pygame.display.set_mode((0,0), 0, 0) #####
 
   # This sets the margin between each cell
@@ -107,7 +116,7 @@ def setup():
   map_width = GRID_SIZE*x_dimension + MARGIN*x_dimension
   map_height = GRID_SIZE*y_dimension + MARGIN*y_dimension
   main_map = pygame.Surface((map_width, map_height))
-  if(GRAPHICS_SWITCH == '-G'):
+  if(GRAPHICS_SWITCH == True):
     main_map = main_map.convert() #####
   done = False
 
@@ -181,7 +190,7 @@ def initWindow():
   DEPTH = 32
   FLAGS = 0
   #screen = pygame.display.set_mode(DISPLAY_SIZE, FLAGS, DEPTH)
-  if(GRAPHICS_SWITCH == '-G'):
+  if(GRAPHICS_SWITCH == True):
     screen = pygame.display.set_mode((WINDOW_DIM,WINDOW_DIM)) #####
 
 
@@ -204,7 +213,7 @@ def initGrid():
     grid[0][i] = i
 
   # Set the screen background
-  if(GRAPHICS_SWITCH == '-G'):
+  if(GRAPHICS_SWITCH == True):
     screen.fill(BLACK)  #####
 
 
@@ -451,7 +460,7 @@ def draw():
 
     pygame.draw.line(main_map, exit_color, (exit_x1,exit_y1), (exit_x2,exit_y2), 3) 
 
-  if(GRAPHICS_SWITCH == '-G'):    
+  if(GRAPHICS_SWITCH == True):    
     screen.blit(main_map, (scroll_x, scroll_y)) #####
     pygame.display.flip() ######
 
@@ -474,7 +483,7 @@ def run():
       pass
    
     # Set title of screen
-    if(GRAPHICS_SWITCH == '-G'):
+    if(GRAPHICS_SWITCH == True):
       pygame.display.set_caption(LABEL) ######
 
     try:
@@ -514,7 +523,7 @@ def heatmap():
 
   pickle.dump(fig, open('fig1.pkl', 'wb'))
 
-  print("Heatmap saved as: " + filename_heatmap +"\n")
+  print("Heatmap saved as: " + filename_heatmap)
 
   plt.show()
 
@@ -581,8 +590,11 @@ if __name__ == "__main__":
       txtOutput()
 
     pygame.quit()
-    
-    heatmap()
+
+    if HEATMAP_SWITCH:
+      heatmap()
+
+    print("\n")
 
   except (KeyboardInterrupt):
     print("\nProgram Terminated by User.\n")
