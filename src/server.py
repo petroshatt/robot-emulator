@@ -45,8 +45,7 @@ def run_TCP(PORT, stop_thread):
 
     #print(input_var)
 
-    conn.close()
-    return input_var,True
+    return conn,input_var,True
 
 
     
