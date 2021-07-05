@@ -2,7 +2,7 @@
     "xdimension": 100,
     "ydimension": 100,
     "grid_size": 25,
-    "label": "Run1",
+    "label": "PetrosRun",
     "obstacle": [],
     "robots": [],
     "robots_movements": [],

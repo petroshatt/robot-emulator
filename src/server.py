@@ -44,7 +44,7 @@ def run_TCP(PORT, stop_thread):
     input_var = re.sub(r"\s+", "", input_var).replace('\\n','').replace("'b'",'').replace('\\r','')[2:][:-1]
 
     #print(input_var)
-
+    
     return conn,input_var,True
 
 
