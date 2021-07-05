@@ -19,7 +19,7 @@ RED = (255, 0, 0)
 
 global json_data
 global heatmap_grid, heatmap_first_tile, new_json_read, robots_count, movements_count
-global LABEL, clock, myfont, textsurface, screen, MARGIN, GRID_SIZE, TILE_SCROLL, WINDOW_DIM
+global LABEL, clock, myfont, axisFont, textsurface, screen, MARGIN, GRID_SIZE, TILE_SCROLL, WINDOW_DIM
 global y_dimension, x_dimension, WIDTH, HEIGHT
 global map_width, map_height, main_map, done, scroll_x, scroll_y, white_tiles_counter, stop_thread
 global last_moves_list, temp_moves_list
@@ -65,7 +65,7 @@ def reloadJson():
 
 
 def setup():
-  global json_data, LABEL, clock, myfont, textsurface, screen, MARGIN, GRID_SIZE, TILE_SCROLL, WINDOW_DIM
+  global json_data, LABEL, clock, myfont, axisFont, textsurface, screen, MARGIN, GRID_SIZE, TILE_SCROLL, WINDOW_DIM
   global y_dimension, x_dimension, WIDTH, HEIGHT, heatmap_grid, heatmap_first_tile
 
   # Initialize pygame
@@ -83,8 +83,6 @@ def setup():
                      # if you want to use this module.
   myfont = pygame.font.SysFont('Arial', 17)
 
-  axisFont = pygame.font.SysFont('Arial', 18)
-
   textsurface = myfont.render('r1', False, RED)
 
   if(GRAPHICS_SWITCH == True):
@@ -94,6 +92,8 @@ def setup():
   MARGIN = 2
   #This sets the default size of each cell on the grid
   GRID_SIZE = json_data["grid_size"]
+
+  axisFont = pygame.font.SysFont('Arial', 17)
 
   TILE_SCROLL = 3
   WINDOW_DIM = 800
@@ -341,7 +341,7 @@ def draw():
 
       #text in case tile is GRID AXIS
       if type(grid[row][column]) == int:
-        textsurface = myfont.render(str(grid[row][column]), False, RED)
+        textsurface = axisFont.render(str(grid[row][column]), False, RED)
         axis_y = GRID_SIZE*row + MARGIN*row
         axis_x = GRID_SIZE*column + MARGIN*column +2
         main_map.blit(textsurface,(axis_x,axis_y))
