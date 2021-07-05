@@ -26,6 +26,8 @@ global last_moves_list, temp_moves_list
 global exception_flag
 global GRAPHICS_SWITCH, HEATMAP_SWITCH
 
+global connection_msg
+
 
 GRAPHICS_SWITCH = False
 HEATMAP_SWITCH = False
@@ -250,6 +252,7 @@ def initObstacles():
         grid[temp_row_obs][temp_col_obs] = (int(color1),int(color2),int(color3))
       except:
         print("\nObstacle out of range.")
+        sendClient("Could not load JSON file.\nObstacle out of range.")
         exception_flag = True
         sys.exit()
 
@@ -274,6 +277,7 @@ def initRobots():
       grid[temp_row_rob][temp_col_rob] = json_data["robots"][i]["robot_name"]
     except:
       print("\nRobot out of range.")
+      sendClient("Could not load JSON file.\nRobot out of range.")
       exception_flag = True
       sys.exit()
 
@@ -473,6 +477,7 @@ def run():
   global RECEIVE
   global done
   global new_json_read
+  global connection_msg
   while not done:
     # Limit to 60 frames per second
     clock.tick()
@@ -501,6 +506,7 @@ def run():
       initRobots()
 
       draw()
+      connection_msg.close()
       new_json_read = False
       
 
@@ -530,10 +536,10 @@ def heatmap():
 
 def runTCP():
 
-  global PORT, json_from_tcp, read, stop_thread, new_json_read, json_data, exception_flag
+  global PORT, json_from_tcp, read, stop_thread, new_json_read, json_data, exception_flag,connection_msg
 
   while True:
-    string_from_tcp, read = server.run_TCP(PORT, stop_thread)
+    connection_msg, string_from_tcp, read = server.run_TCP(PORT, stop_thread)
 
     try:
       json_from_tcp = json.loads(string_from_tcp)
@@ -544,11 +550,15 @@ def runTCP():
         break
     except:
       print("\nCould not load JSON file.")
+      sendClient("Could not load JSON file.")
       exception_flag = True
       sys.exit()
 
   
-
+def sendClient (msg):
+  global connection_msg   
+  connection_msg.send(msg.encode())
+  connection_msg.close()
 
 # -------- Main Program Loop -----------
 if __name__ == "__main__":
@@ -575,12 +585,13 @@ if __name__ == "__main__":
       if exception_flag == True:
         sys.exit()
 
-      #try:
-      setup()
-      #except:
-        #print("\nError setting up the grid.")
-        #exception_flag = True
-        #sys.exit()
+      try:
+        setup()
+      except:
+        print("\nError setting up the grid.")
+        sendClient("Could not load JSON file.\nError setting up the grid.")
+        exception_flag = True
+        sys.exit()
 
       initWindow()
       initGrid()
